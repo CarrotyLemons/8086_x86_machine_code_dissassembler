@@ -10,7 +10,7 @@ fn main() -> () {
     let mut assembled_program = fs::read(path).unwrap().into_iter();
 
     loop {
-        let read_instruction= match x86_definitions::extract_instruction(&mut assembled_program) {
+        let read_instruction = match x86_definitions::extract_instruction(&mut assembled_program) {
             Ok(value) => value,
             Err(e) => {
                 eprintln!("{}", e);

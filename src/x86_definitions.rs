@@ -93,7 +93,11 @@ pub fn extract_instruction(
     if byte1 & 0xFC == 0x88 {
         let byte2 = match machine_code.next() {
             Some(value) => value,
-            None => return Err(FailedDecode { byte1 }),
+            None => {
+                return Err(FailedDecode {
+                    bytes: (byte1 as u64),
+                });
+            }
         };
 
         let reg = byte2 >> 3 & 0x07;
@@ -111,9 +115,25 @@ pub fn extract_instruction(
             }
         };
 
-        //////////////
-        // Handle Mode
-        let mode = byte1 >> 6;
+        ///////////////
+        // handle D bit
+        // d is 1, destination is in reg field
+        let decoded_instruction = if byte1 & 0x02 == 0x02 {
+            Instructions::Move(MoveInstruction {
+                source: Location::Register(relevant_register_array[reg_or_mem as usize]),
+                destination: Location::Register(relevant_register_array[reg as usize]),
+            })
+        // d is 0, source is in reg field
+        } else {
+            Instructions::Move(MoveInstruction {
+                source: Location::Register(relevant_register_array[reg as usize]),
+                destination: Location::Register(relevant_register_array[reg_or_mem as usize]),
+            })
+        };
+
+        /////////////////////////////////////////////////////
+        // Handle Mode (currently just discarding those bits)
+        let mode = byte2 >> 6;
         // Logic of padding bytes is described in 8086 manual
         if mode == 0x2 {
             machine_code.nth(0);
@@ -121,22 +141,10 @@ pub fn extract_instruction(
             machine_code.nth(1);
         }
 
-        ///////////////
-        // handle D bit
-        // d is 1, destination is in reg field
-        if byte1 & 0x02 == 0x02 {
-            return Ok(Some(Instructions::Move(MoveInstruction {
-                source: Location::Register(relevant_register_array[reg_or_mem as usize]),
-                destination: Location::Register(relevant_register_array[reg as usize]),
-            })));
-        // d is 0, source is in reg field
-        } else {
-            return Ok(Some(Instructions::Move(MoveInstruction {
-                source: Location::Register(relevant_register_array[reg as usize]),
-                destination: Location::Register(relevant_register_array[reg_or_mem as usize]),
-            })));
-        }
+        return Ok(Some(decoded_instruction));
     }
 
-    Err(FailedDecode { byte1 })
+    Err(FailedDecode {
+        bytes: (byte1 as u64),
+    })
 }
