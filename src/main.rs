@@ -1,16 +1,24 @@
-use std::{env::args, error::Error, fs};
+use std::{env::args, fs};
 
 use crate::x86_definitions::{Instructions, read_location};
 
 mod errors;
 mod x86_definitions;
 
-fn main() -> Result<(), Box<dyn Error>> {
+fn main() -> () {
     let path = args().into_iter().nth(1).unwrap();
     let mut assembled_program = fs::read(path).unwrap().into_iter();
 
     loop {
-        match x86_definitions::extract_instruction(&mut assembled_program)? {
+        let read_instruction= match x86_definitions::extract_instruction(&mut assembled_program) {
+            Ok(value) => value,
+            Err(e) => {
+                eprintln!("{}", e);
+                return;
+            }
+        };
+
+        match read_instruction {
             Some(instruction) => match instruction {
                 Instructions::Move(move_instruction) => {
                     println!(
@@ -20,7 +28,7 @@ fn main() -> Result<(), Box<dyn Error>> {
                     )
                 }
             },
-            None => return Ok(()),
+            None => return,
         };
     }
 }
