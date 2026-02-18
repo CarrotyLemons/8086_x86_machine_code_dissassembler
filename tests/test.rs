@@ -1,9 +1,7 @@
-use core::time;
 use instruction_decoding_on_the_8086::x86_decoder;
 use std::fs::{self};
-use std::io::{self, BufRead, BufReader, ErrorKind, Read};
+use std::io::{self, ErrorKind, Read};
 use std::process::Command;
-use std::thread::sleep;
 use tempfile::NamedTempFile;
 
 #[cfg(test)]

@@ -21,8 +21,7 @@ pub fn decode_instructions(source_file: Vec<u8>, mut destination_file: File) {
                 Instructions::Move(move_instruction) => writeln!(
                     destination_file,
                     "mov {}, {}",
-                    read_location(move_instruction.destination),
-                    read_location(move_instruction.source)
+                    move_instruction.destination, move_instruction.source,
                 )
                 .unwrap(),
             },
