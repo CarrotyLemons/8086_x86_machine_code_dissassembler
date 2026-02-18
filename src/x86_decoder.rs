@@ -18,15 +18,13 @@ pub fn decode_instructions(source_file: Vec<u8>, mut destination_file: File) {
         };
         match read_instruction {
             Some(instruction) => match instruction {
-                Instructions::Move(move_instruction) => {
-                    writeln!(
-                        destination_file,
-                        "mov {}, {}",
-                        read_location(move_instruction.destination),
-                        read_location(move_instruction.source)
-                    )
-                    .unwrap()
-                }
+                Instructions::Move(move_instruction) => writeln!(
+                    destination_file,
+                    "mov {}, {}",
+                    read_location(move_instruction.destination),
+                    read_location(move_instruction.source)
+                )
+                .unwrap(),
             },
             None => return,
         };

@@ -1,9 +1,9 @@
 use core::time;
+use instruction_decoding_on_the_8086::x86_decoder;
+use std::fs::{self};
 use std::io::{self, BufRead, BufReader, ErrorKind, Read};
 use std::process::Command;
-use std::fs::{self};
 use std::thread::sleep;
-use instruction_decoding_on_the_8086::x86_decoder;
 use tempfile::NamedTempFile;
 
 #[cfg(test)]
@@ -21,39 +21,51 @@ fn tool_exists(name: &str) -> Result<bool, io::Error> {
 }
 
 fn compare_decompilation(source_binary_name: &str) {
-        let source_asm_name = format!("{}.asm", source_binary_name);
+    let source_asm_name = format!("{}.asm", source_binary_name);
 
-        let destination_asm = NamedTempFile::new().unwrap();
-        let destination_asm_name = destination_asm.path().to_str().unwrap();
+    let destination_asm = NamedTempFile::new().unwrap();
+    let destination_asm_name = destination_asm.path().to_str().unwrap();
 
-        let destination_binary_name = NamedTempFile::new().unwrap();
-        let destination_binary_name = destination_binary_name.path().to_str().unwrap();
+    let destination_binary_name = NamedTempFile::new().unwrap();
+    let destination_binary_name = destination_binary_name.path().to_str().unwrap();
 
-        // Create assembled file
-        Command::new("nasm").arg(&source_asm_name).output().unwrap();
-        let source_file = fs::read(&source_binary_name).unwrap();
+    // Create assembled file
+    Command::new("nasm").arg(&source_asm_name).output().unwrap();
+    let source_file = fs::read(&source_binary_name).unwrap();
 
-        // Run decoding
-        x86_decoder::decode_instructions(source_file, destination_asm.reopen().unwrap());
+    // Run decoding
+    x86_decoder::decode_instructions(source_file, destination_asm.reopen().unwrap());
 
-        // Encode output
-        Command::new("nasm").args([destination_asm_name, "-o", destination_binary_name]).output().unwrap();
+    // Encode output
+    Command::new("nasm")
+        .args([destination_asm_name, "-o", destination_binary_name])
+        .output()
+        .unwrap();
 
-        // Compare encoded source and encoded output
-        let diff_result = Command::new("diff").args([&source_binary_name, &destination_binary_name]).output().unwrap();
-        let diff_success = diff_result.status.success();
+    // Compare encoded source and encoded output
+    let diff_result = Command::new("diff")
+        .args([&source_binary_name, &destination_binary_name])
+        .output()
+        .unwrap();
+    let diff_success = diff_result.status.success();
 
-        if !diff_success {
-            let mut buf = String::new();
-            destination_asm.into_file().read_to_string(&mut buf).unwrap();
-            println!("{}", buf);
-        }
-
-        // Delete created files
-        Command::new("trash").arg(&source_binary_name).output().unwrap();
-
-        assert!(diff_success);
+    if !diff_success {
+        let mut buf = String::new();
+        destination_asm
+            .into_file()
+            .read_to_string(&mut buf)
+            .unwrap();
+        println!("{}", buf);
     }
+
+    // Delete created files
+    Command::new("trash")
+        .arg(&source_binary_name)
+        .output()
+        .unwrap();
+
+    assert!(diff_success);
+}
 
 mod tests {
     use super::*;
@@ -75,5 +87,4 @@ mod tests {
     fn listing_0038() {
         compare_decompilation("tests/listing_0038_many_register_mov")
     }
-    
 }
