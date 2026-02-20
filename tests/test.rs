@@ -85,4 +85,14 @@ mod tests {
     fn listing_0038() {
         compare_decompilation("tests/listing_0038_many_register_mov")
     }
+
+    #[test]
+    fn listing_0039() {
+        compare_decompilation("tests/listing_0039_more_movs")
+    }
+
+    #[test]
+    fn listing_0040() {
+        compare_decompilation("tests/listing_0040_challenge_movs")
+    }
 }
