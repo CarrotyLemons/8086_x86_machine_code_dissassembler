@@ -96,7 +96,7 @@ pub fn extract_register_or_memory_to_or_from_register(
                 as i8;
 
         reg = get_standard_register_encoding(reg_bits, is_word_encoding);
-        reg_or_mem = get_expression_register_encoding(reg_or_mem_bits, offset.try_into().unwrap());
+        reg_or_mem = get_expression_register_encoding(reg_or_mem_bits, offset.into());
     // Addressing memory from register with two byte offset
     } else {
         let offset = get_u16_displacement_from_iterator(
@@ -158,7 +158,7 @@ pub fn extract_immediate_to_register_or_memory(
             get_u8_displacement_from_iterator(machine_code, byte1, "Missing byte for u8 offset!")?
                 as i8;
 
-        reg_or_mem = get_expression_register_encoding(reg_or_mem_bits, offset.try_into().unwrap());
+        reg_or_mem = get_expression_register_encoding(reg_or_mem_bits, offset.into());
     // Addressing memory from register with two byte offset
     } else {
         let offset = get_u16_displacement_from_iterator(
