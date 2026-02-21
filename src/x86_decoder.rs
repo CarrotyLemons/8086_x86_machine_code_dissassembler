@@ -185,7 +185,10 @@ pub fn extract_immediate_to_register_or_memory(
             "Missing bytes for u16 immediate!",
         )? as u16;
     }
-    let immediate = Reference::Imm(Immediate { value: immediate });
+    let immediate = Reference::Imm(Immediate {
+        value: immediate,
+        is_word_encoding,
+    });
 
     return Ok(Some(Instructions::Move(MoveInstruction {
         source: immediate,
@@ -217,7 +220,10 @@ pub fn extract_immediate_to_register(
             "Missing bytes for u16 immediate!",
         )? as u16;
     }
-    let immediate = Reference::Imm(Immediate { value: immediate });
+    let immediate = Reference::Imm(Immediate {
+        value: immediate,
+        is_word_encoding,
+    });
 
     return Ok(Some(Instructions::Move(MoveInstruction {
         source: immediate,

@@ -124,10 +124,16 @@ impl std::fmt::Display for Register {
 
 pub struct Immediate {
     pub value: u16,
+    pub is_word_encoding: bool,
 }
 
 impl std::fmt::Display for Immediate {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        if self.is_word_encoding {
+            f.write_str("word ")?;
+        } else {
+            f.write_str("byte ")?;
+        }
         f.write_str(self.value.to_string().as_str())?;
         Ok(())
     }
