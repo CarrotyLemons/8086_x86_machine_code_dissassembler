@@ -45,7 +45,7 @@ impl std::fmt::Display for Reference {
 
 pub struct Memory {
     pub registers: [Option<Register>; 2],
-    pub offset: u16,
+    pub offset: i16,
 }
 
 impl std::fmt::Display for Memory {
