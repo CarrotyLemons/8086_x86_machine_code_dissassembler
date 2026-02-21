@@ -28,7 +28,8 @@ fn compare_decompilation(source_binary_name: &str) {
     let destination_binary_name = destination_binary_name.path().to_str().unwrap();
 
     // Create assembled file
-    Command::new("nasm").arg(&source_asm_name).output().unwrap();
+    Command::new("nasm").arg(&source_asm_name).status().unwrap();
+
     let source_file = fs::read(&source_binary_name).unwrap();
 
     // Run decoding
@@ -37,15 +38,15 @@ fn compare_decompilation(source_binary_name: &str) {
     // Encode output
     Command::new("nasm")
         .args([destination_asm_name, "-o", destination_binary_name])
-        .output()
+        .status()
         .unwrap();
 
     // Compare encoded source and encoded output
     let diff_result = Command::new("diff")
         .args([&source_binary_name, &destination_binary_name])
-        .output()
+        .status()
         .unwrap();
-    let diff_success = diff_result.status.success();
+    let diff_success = diff_result.success();
 
     if !diff_success {
         let mut buf = String::new();
@@ -59,7 +60,7 @@ fn compare_decompilation(source_binary_name: &str) {
     // Delete created files
     Command::new("trash")
         .arg(&source_binary_name)
-        .output()
+        .status()
         .unwrap();
 
     assert!(diff_success);
