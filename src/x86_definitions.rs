@@ -30,6 +30,7 @@ impl std::fmt::Display for MoveInstruction {
 pub enum Reference {
     Reg(Register),
     Mem(Memory),
+    Imm(Immediate),
 }
 
 impl std::fmt::Display for Reference {
@@ -37,6 +38,7 @@ impl std::fmt::Display for Reference {
         match self {
             Reference::Reg(register) => f.write_str(register.to_string().as_str()),
             Reference::Mem(memory) => f.write_str(memory.to_string().as_str()),
+            Reference::Imm(immediate) => f.write_str(immediate.to_string().as_str()),
         }
     }
 }
@@ -55,14 +57,14 @@ impl std::fmt::Display for Memory {
             Some(register) => {
                 f.write_str(register.to_string().as_str())?;
                 f.write_str(" + ")?;
-            },
+            }
         };
         match self.registers[1] {
             None => (),
             Some(register) => {
                 f.write_str(register.to_string().as_str())?;
                 f.write_str(" + ")?;
-            },
+            }
         };
 
         f.write_str(self.offset.to_string().as_str())?;
@@ -116,6 +118,17 @@ impl std::fmt::Display for Register {
 
         f.write_str(representation)?;
 
+        Ok(())
+    }
+}
+
+pub struct Immediate {
+    pub value: u16,
+}
+
+impl std::fmt::Display for Immediate {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.write_str(self.value.to_string().as_str())?;
         Ok(())
     }
 }

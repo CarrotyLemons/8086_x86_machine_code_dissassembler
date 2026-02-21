@@ -22,7 +22,8 @@ pub fn get_u16_displacement_from_iterator<'a>(
     message: &'a str,
 ) -> Result<u16, FailedDecode<'a>> {
     let address: u16 = get_u8_displacement_from_iterator(iterator, byte1, message)? as u16;
-    let address = ((get_u8_displacement_from_iterator(iterator, byte1, message)? as u16) << 8) + address;
+    let address =
+        ((get_u8_displacement_from_iterator(iterator, byte1, message)? as u16) << 8) + address;
     return Ok(address);
 }
 
@@ -35,7 +36,10 @@ mod tests {
         let input: Vec<u8> = vec![0x0C, 0x03];
         let mut input = input.into_iter();
 
-        assert_eq!(get_u16_displacement_from_iterator(&mut input, 0x00, "").unwrap(), 0x030C as u16)
+        assert_eq!(
+            get_u16_displacement_from_iterator(&mut input, 0x00, "").unwrap(),
+            0x030C as u16
+        )
     }
 
     #[test]
@@ -43,6 +47,9 @@ mod tests {
         let input: Vec<u8> = vec![0x87, 0x13];
         let mut input = input.into_iter();
 
-        assert_eq!(get_u16_displacement_from_iterator(&mut input, 0x00, "").unwrap(), 0x1387 as u16)
+        assert_eq!(
+            get_u16_displacement_from_iterator(&mut input, 0x00, "").unwrap(),
+            0x1387 as u16
+        )
     }
 }

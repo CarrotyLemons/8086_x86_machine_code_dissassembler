@@ -1,4 +1,4 @@
-use instruction_decoding_on_the_8086::x86_decoder;
+use instruction_decoding_on_the_8086::*;
 use std::fs::{self};
 use std::io::{self, ErrorKind, Read};
 use std::process::Command;
@@ -33,7 +33,7 @@ fn compare_decompilation(source_binary_name: &str) {
     let source_file = fs::read(&source_binary_name).unwrap();
 
     // Run decoding
-    x86_decoder::decode_instructions(source_file, destination_asm.reopen().unwrap());
+    decode_instructions(source_file, destination_asm.reopen().unwrap());
 
     // Encode output
     Command::new("nasm")

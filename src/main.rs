@@ -3,10 +3,7 @@ use std::{
     fs::{self},
 };
 
-mod errors;
-mod tools;
-mod x86_decoder;
-mod x86_definitions;
+use instruction_decoding_on_the_8086::*;
 
 fn main() -> () {
     // File handling
@@ -18,5 +15,5 @@ fn main() -> () {
     let destination_file = arguments.next().unwrap();
     let destination_file = fs::File::create_new(destination_file).unwrap();
 
-    x86_decoder::decode_instructions(source_file, destination_file);
+    decode_instructions(source_file, destination_file);
 }
