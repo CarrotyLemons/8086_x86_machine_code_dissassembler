@@ -230,3 +230,32 @@ pub fn extract_immediate_to_register(
         destination: reg,
     })));
 }
+
+pub fn extract_accumulator_to_memory_or_memory_to_accumulator(
+    machine_code: &mut std::vec::IntoIter<u8>,
+    byte1: u8,
+) -> DecodeResult<Option<Instructions>> {
+    let address: u16 = get_u16_displacement_from_iterator(
+        machine_code,
+        byte1,
+        "Missing bytes for direct address",
+    )?;
+
+    let address = Reference::Mem(Memory {
+        registers: [None, None],
+        offset: address,
+    });
+
+    let is_accumulator_to_memory = byte1 & 0x02 == 0x02;
+
+    let (source, destination) = if is_accumulator_to_memory {
+        (Reference::Reg(Register::AX), address)
+    } else {
+        (address, Reference::Reg(Register::AX))
+    };
+
+    return Ok(Some(Instructions::Move(MoveInstruction {
+        source,
+        destination,
+    })));
+}
