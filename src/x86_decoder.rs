@@ -246,12 +246,19 @@ pub fn extract_accumulator_to_memory_or_memory_to_accumulator(
         offset: address,
     });
 
+    let is_word_encoding = byte1 & 0x1 == 0x1;
+    let destination = if is_word_encoding {
+        Reference::Reg(Register::AX)
+    } else {
+        Reference::Reg(Register::AL)
+    };
+
     let is_accumulator_to_memory = byte1 & 0x02 == 0x02;
 
     let (source, destination) = if is_accumulator_to_memory {
-        (Reference::Reg(Register::AX), address)
+        (destination, address)
     } else {
-        (address, Reference::Reg(Register::AX))
+        (address, destination)
     };
 
     return Ok(Some(Instructions::Move(MoveInstruction {
