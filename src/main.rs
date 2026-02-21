@@ -4,11 +4,11 @@ use std::{
 };
 
 mod errors;
+mod tools;
 mod x86_decoder;
 mod x86_definitions;
 
 fn main() -> () {
-    ////////////////
     // File handling
     let mut arguments = args();
 

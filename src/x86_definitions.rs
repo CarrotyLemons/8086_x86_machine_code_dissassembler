@@ -1,81 +1,121 @@
-use crate::errors::*;
+use Register as Reg;
 
-pub const BYTE_DATA_REGISTERS: [&str; 8] = ["al", "cl", "dl", "bl", "ah", "ch", "dh", "bh"];
-pub const WORD_DATA_REGISTERS: [&str; 8] = ["ax", "cx", "dx", "bx", "sp", "bp", "si", "di"];
-
-pub struct MoveInstruction<'a> {
-    pub source: &'a str,
-    pub destination: &'a str,
+pub enum Instructions {
+    Move(MoveInstruction),
 }
 
-pub enum Instructions<'a> {
-    Move(MoveInstruction<'a>),
-}
-
-pub fn extract_instruction(
-    machine_code: &mut std::vec::IntoIter<u8>,
-) -> DecodeResult<Option<Instructions>> {
-    let byte1 = match machine_code.next() {
-        Some(value) => value,
-        None => return Ok(None),
-    };
-
-    ///////////////////////////////////
-    // Register/memory to/from register
-    if byte1 & 0xFC == 0x88 {
-        let byte2 = match machine_code.next() {
-            Some(value) => value,
-            None => {
-                return Err(FailedDecode {
-                    bytes: (byte1 as u64),
-                });
-            }
-        };
-
-        let reg = byte2 >> 3 & 0x07;
-        let reg_or_mem = byte2 & 0x07;
-
-        // Handle W bit
-        let (reg_str, reg_or_mem_str) = if byte1 & 0x1 == 0x1 {
-            // w = 1, operating on word data
-            (
-                WORD_DATA_REGISTERS[reg as usize],
-                WORD_DATA_REGISTERS[reg_or_mem as usize],
-            )
-        } else {
-            // w = 0, operating on byte data
-            (
-                BYTE_DATA_REGISTERS[reg as usize],
-                BYTE_DATA_REGISTERS[reg_or_mem as usize],
-            )
-        };
-
-        // Handle D bit
-        let (source, destination) = if byte1 & 0x02 == 0x02 {
-            // d is 1, destination is in reg field
-            (reg_or_mem_str, reg_str)
-        } else {
-            // d is 0, source is in reg field
-            (reg_str, reg_or_mem_str)
-        };
-
-        let decoded_instruction = Instructions::Move(MoveInstruction {
-            source,
-            destination,
-        });
-
-        // Handle Mode (currently just discarding those bits)
-        let mode = byte2 >> 6;
-        if mode == 0x2 {
-            machine_code.nth(0);
-        } else if (reg_or_mem == 0x6 && mode == 0x0) || (mode == 0x2) {
-            machine_code.nth(1);
+impl std::fmt::Display for Instructions {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Instructions::Move(instruction) => f.write_str(instruction.to_string().as_str()),
         }
-
-        return Ok(Some(decoded_instruction));
     }
+}
 
-    Err(FailedDecode {
-        bytes: (byte1 as u64),
-    })
+pub struct MoveInstruction {
+    pub source: Reference,
+    pub destination: Reference,
+}
+
+impl std::fmt::Display for MoveInstruction {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.write_fmt(format_args!(
+            "mov {}, {}",
+            self.destination.to_string(),
+            self.source.to_string()
+        ))
+    }
+}
+
+pub enum Reference {
+    Reg(Register),
+    Mem(Memory),
+}
+
+impl std::fmt::Display for Reference {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Reference::Reg(register) => f.write_str(register.to_string().as_str()),
+            Reference::Mem(memory) => f.write_str(memory.to_string().as_str()),
+        }
+    }
+}
+
+pub struct Memory {
+    pub registers: [Option<Register>; 2],
+    pub offset: u16,
+}
+
+impl std::fmt::Display for Memory {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.write_str("[")?;
+
+        match self.registers[0] {
+            None => (),
+            Some(register) => {
+                f.write_str(register.to_string().as_str())?;
+                f.write_str(" + ")?;
+            },
+        };
+        match self.registers[1] {
+            None => (),
+            Some(register) => {
+                f.write_str(register.to_string().as_str())?;
+                f.write_str(" + ")?;
+            },
+        };
+
+        f.write_str(self.offset.to_string().as_str())?;
+
+        f.write_str("]")?;
+
+        Ok(())
+    }
+}
+
+#[derive(Clone, Copy)]
+pub enum Register {
+    AL,
+    CL,
+    DL,
+    BL,
+    AH,
+    CH,
+    DH,
+    BH,
+    AX,
+    CX,
+    DX,
+    BX,
+    SP,
+    BP,
+    SI,
+    DI,
+}
+
+impl std::fmt::Display for Register {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let representation = match *self {
+            Reg::AL => "al",
+            Reg::CL => "cl",
+            Reg::DL => "dl",
+            Reg::BL => "bl",
+            Reg::AH => "ah",
+            Reg::CH => "ch",
+            Reg::DH => "dh",
+            Reg::BH => "bh",
+            Reg::AX => "ax",
+            Reg::CX => "cx",
+            Reg::DX => "dx",
+            Reg::BX => "bx",
+            Reg::SP => "sp",
+            Reg::BP => "bp",
+            Reg::SI => "si",
+            Reg::DI => "di",
+        };
+
+        f.write_str(representation)?;
+
+        Ok(())
+    }
 }

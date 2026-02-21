@@ -1,16 +1,21 @@
 use std::fmt::{self, Debug};
 
-pub type DecodeResult<T> = std::result::Result<T, FailedDecode>;
+pub type DecodeResult<'a, T> = std::result::Result<T, FailedDecode<'a>>;
 
 #[derive(Debug)]
-pub struct FailedDecode {
-    pub bytes: u64,
+pub struct FailedDecode<'a> {
+    pub bytes: u8,
+    pub message: &'a str,
 }
 
-impl fmt::Display for FailedDecode {
+impl<'a> fmt::Display for FailedDecode<'a> {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "Failed decode starting from byte {:X}", self.bytes)
+        write!(
+            f,
+            "Failed decode starting from byte {:X} - {}",
+            self.bytes, self.message
+        )
     }
 }
 
-impl std::error::Error for FailedDecode {}
+impl<'a> std::error::Error for FailedDecode<'a> {}
