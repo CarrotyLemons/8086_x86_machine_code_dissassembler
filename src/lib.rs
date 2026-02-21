@@ -51,7 +51,7 @@ pub fn extract_instruction(
     if byte1 & 0xF0 == 0xB0 {
         return extract_immediate_to_register(machine_code, byte1);
     }
-    if byte1 & 0xFE == 0xAC {
+    if byte1 & 0xFC == 0xA0 {
         return extract_accumulator_to_memory_or_memory_to_accumulator(machine_code, byte1);
     }
 
