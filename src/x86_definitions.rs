@@ -1,26 +1,34 @@
-use Register as Reg;
-
 pub enum Instructions {
-    Move(MoveInstruction),
+    Move,
+    Add,
+    Subtract,
 }
 
 impl std::fmt::Display for Instructions {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        match self {
-            Instructions::Move(instruction) => f.write_str(instruction.to_string().as_str()),
-        }
+        let representation = match self {
+            Instructions::Move => "mov",
+            Instructions::Add => "add",
+            Instructions::Subtract => "sub",
+        };
+
+        f.write_str(representation)?;
+
+        Ok(())
     }
 }
 
-pub struct MoveInstruction {
+pub struct Instruction {
+    pub instruction: Instructions,
     pub source: Reference,
     pub destination: Reference,
 }
 
-impl std::fmt::Display for MoveInstruction {
+impl std::fmt::Display for Instruction {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         f.write_fmt(format_args!(
-            "mov {}, {}",
+            "{} {}, {}",
+            self.instruction.to_string(),
             self.destination.to_string(),
             self.source.to_string()
         ))
@@ -97,23 +105,23 @@ pub enum Register {
 
 impl std::fmt::Display for Register {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        let representation = match *self {
-            Reg::AL => "al",
-            Reg::CL => "cl",
-            Reg::DL => "dl",
-            Reg::BL => "bl",
-            Reg::AH => "ah",
-            Reg::CH => "ch",
-            Reg::DH => "dh",
-            Reg::BH => "bh",
-            Reg::AX => "ax",
-            Reg::CX => "cx",
-            Reg::DX => "dx",
-            Reg::BX => "bx",
-            Reg::SP => "sp",
-            Reg::BP => "bp",
-            Reg::SI => "si",
-            Reg::DI => "di",
+        let representation = match self {
+            Register::AL => "al",
+            Register::CL => "cl",
+            Register::DL => "dl",
+            Register::BL => "bl",
+            Register::AH => "ah",
+            Register::CH => "ch",
+            Register::DH => "dh",
+            Register::BH => "bh",
+            Register::AX => "ax",
+            Register::CX => "cx",
+            Register::DX => "dx",
+            Register::BX => "bx",
+            Register::SP => "sp",
+            Register::BP => "bp",
+            Register::SI => "si",
+            Register::DI => "di",
         };
 
         f.write_str(representation)?;

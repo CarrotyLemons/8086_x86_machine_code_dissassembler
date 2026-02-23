@@ -58,7 +58,8 @@ pub fn get_expression_register_encoding(bits: u8, offset: i16) -> Reference {
 pub fn extract_register_or_memory_to_or_from_register(
     machine_code: &mut std::vec::IntoIter<u8>,
     byte1: u8,
-) -> DecodeResult<Option<Instructions>> {
+    instruction: Instructions,
+) -> DecodeResult<Option<Instruction>> {
     let byte2 = get_u8_displacement_from_iterator(machine_code, byte1, "missing second byte!")?;
 
     let reg_bits = byte2 >> 3 & 0x07;
@@ -117,16 +118,18 @@ pub fn extract_register_or_memory_to_or_from_register(
         (reg, reg_or_mem)
     };
 
-    return Ok(Some(Instructions::Move(MoveInstruction {
+    return Ok(Some(Instruction {
+        instruction,
         source,
         destination,
-    })));
+    }));
 }
 
 pub fn extract_immediate_to_register_or_memory(
     machine_code: &mut std::vec::IntoIter<u8>,
     byte1: u8,
-) -> DecodeResult<Option<Instructions>> {
+    instruction: Instructions,
+) -> DecodeResult<Option<Instruction>> {
     let byte2 = get_u8_displacement_from_iterator(machine_code, byte1, "missing second byte!")?;
     let reg_or_mem_bits = byte2 & 0x07;
     let is_word_encoding = byte1 & 0x1 == 0x1;
@@ -190,16 +193,18 @@ pub fn extract_immediate_to_register_or_memory(
         is_word_encoding,
     });
 
-    return Ok(Some(Instructions::Move(MoveInstruction {
+    return Ok(Some(Instruction {
+        instruction,
         source: immediate,
         destination: reg_or_mem,
-    })));
+    }));
 }
 
 pub fn extract_immediate_to_register(
     machine_code: &mut std::vec::IntoIter<u8>,
     byte1: u8,
-) -> DecodeResult<Option<Instructions>> {
+    instruction: Instructions,
+) -> DecodeResult<Option<Instruction>> {
     let reg_bits = byte1 & 0x07;
     let is_word_encoding = byte1 & 0x8 == 0x8;
 
@@ -225,16 +230,18 @@ pub fn extract_immediate_to_register(
         is_word_encoding,
     });
 
-    return Ok(Some(Instructions::Move(MoveInstruction {
+    return Ok(Some(Instruction {
+        instruction,
         source: immediate,
         destination: reg,
-    })));
+    }));
 }
 
 pub fn extract_accumulator_to_memory_or_memory_to_accumulator(
     machine_code: &mut std::vec::IntoIter<u8>,
     byte1: u8,
-) -> DecodeResult<Option<Instructions>> {
+    instruction: Instructions,
+) -> DecodeResult<Option<Instruction>> {
     let address = get_u16_displacement_from_iterator(
         machine_code,
         byte1,
@@ -261,8 +268,9 @@ pub fn extract_accumulator_to_memory_or_memory_to_accumulator(
         (address, destination)
     };
 
-    return Ok(Some(Instructions::Move(MoveInstruction {
+    return Ok(Some(Instruction {
+        instruction,
         source,
         destination,
-    })));
+    }));
 }

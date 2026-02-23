@@ -36,23 +36,31 @@ pub fn decode_instructions(source_file: Vec<u8>, mut destination_file: File) {
 
 pub fn extract_instruction(
     machine_code: &mut std::vec::IntoIter<u8>,
-) -> DecodeResult<Option<Instructions>> {
+) -> DecodeResult<Option<Instruction>> {
     let byte1 = match machine_code.next() {
         Some(value) => value,
         None => return Ok(None),
     };
 
     if byte1 & 0xFC == 0x88 {
-        return extract_register_or_memory_to_or_from_register(machine_code, byte1);
+        return extract_register_or_memory_to_or_from_register(
+            machine_code,
+            byte1,
+            Instructions::Move,
+        );
     }
     if byte1 & 0xFE == 0xC6 {
-        return extract_immediate_to_register_or_memory(machine_code, byte1);
+        return extract_immediate_to_register_or_memory(machine_code, byte1, Instructions::Move);
     }
     if byte1 & 0xF0 == 0xB0 {
-        return extract_immediate_to_register(machine_code, byte1);
+        return extract_immediate_to_register(machine_code, byte1, Instructions::Move);
     }
     if byte1 & 0xFC == 0xA0 {
-        return extract_accumulator_to_memory_or_memory_to_accumulator(machine_code, byte1);
+        return extract_accumulator_to_memory_or_memory_to_accumulator(
+            machine_code,
+            byte1,
+            Instructions::Move,
+        );
     }
 
     Err(FailedDecode {
