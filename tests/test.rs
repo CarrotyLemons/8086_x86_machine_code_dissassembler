@@ -96,4 +96,9 @@ mod tests {
     fn listing_0040() {
         compare_decompilation("tests/listing_0040_challenge_movs")
     }
+
+    #[test]
+    fn listing_0041() {
+        compare_decompilation("tests/listing_0041_add_sub_cmp_jnz")
+    }
 }
