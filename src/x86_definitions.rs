@@ -2,6 +2,7 @@ pub enum Instructions {
     Move,
     Add,
     Subtract,
+    Compare,
 }
 
 impl std::fmt::Display for Instructions {
@@ -10,6 +11,7 @@ impl std::fmt::Display for Instructions {
             Instructions::Move => "mov",
             Instructions::Add => "add",
             Instructions::Subtract => "sub",
+            Instructions::Compare => "cmp",
         };
 
         f.write_str(representation)?;
@@ -22,16 +24,56 @@ pub struct Instruction {
     pub instruction: Instructions,
     pub source: Reference,
     pub destination: Reference,
+    pub sizing: Option<InstructionSizing>,
 }
 
 impl std::fmt::Display for Instruction {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.write_fmt(format_args!(
-            "{} {}, {}",
-            self.instruction.to_string(),
-            self.destination.to_string(),
-            self.source.to_string()
-        ))
+        f.write_str(self.instruction.to_string().as_str())?;
+        f.write_str(" ")?;
+        match &self.sizing {
+            None => {}
+            Some(sizing) => {
+                if !sizing.is_source {
+                    f.write_fmt(format_args!("{} ", sizing))?
+                }
+            }
+        };
+        f.write_str(self.destination.to_string().as_str())?;
+        f.write_str(", ")?;
+        match &self.sizing {
+            None => {}
+            Some(sizing) => {
+                if sizing.is_source {
+                    f.write_fmt(format_args!("{} ", sizing))?
+                }
+            }
+        };
+        // if self.sizing.is_source {f.write_fmt(format_args!("{} "), self.sizing.is_source)};
+        f.write_str(self.source.to_string().as_str())?;
+
+        Ok(())
+    }
+}
+
+pub struct InstructionSizing {
+    pub is_source: bool,
+    pub size: InstructionSizingOptions,
+}
+
+pub enum InstructionSizingOptions {
+    Word,
+    Byte,
+}
+
+impl std::fmt::Display for InstructionSizing {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let text = match self.size {
+            InstructionSizingOptions::Byte => "byte",
+            InstructionSizingOptions::Word => "word",
+        };
+
+        f.write_str(text)
     }
 }
 
@@ -132,16 +174,10 @@ impl std::fmt::Display for Register {
 
 pub struct Immediate {
     pub value: u16,
-    pub is_word_encoding: bool,
 }
 
 impl std::fmt::Display for Immediate {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        if self.is_word_encoding {
-            f.write_str("word ")?;
-        } else {
-            f.write_str("byte ")?;
-        }
         f.write_str(self.value.to_string().as_str())?;
         Ok(())
     }

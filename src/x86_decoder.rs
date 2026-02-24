@@ -122,6 +122,7 @@ pub fn extract_register_or_memory_to_or_from_register(
         instruction,
         source,
         destination,
+        sizing: None,
     }));
 }
 
@@ -173,30 +174,13 @@ pub fn extract_immediate_to_register_or_memory(
         reg_or_mem = get_expression_register_encoding(reg_or_mem_bits, offset);
     }
 
-    // Getting the immediate
-    let immediate;
-    if is_word_encoding {
-        immediate = get_u16_displacement_from_iterator(
-            machine_code,
-            byte1,
-            "Missing bytes for u16 immediate!",
-        )?;
-    } else {
-        immediate = get_u8_displacement_from_iterator(
-            machine_code,
-            byte1,
-            "Missing bytes for u16 immediate!",
-        )? as u16;
-    }
-    let immediate = Reference::Imm(Immediate {
-        value: immediate,
-        is_word_encoding,
-    });
+    let (immediate, sizing) = get_immediate_and_sizing(machine_code, byte1, is_word_encoding)?;
 
     return Ok(Some(Instruction {
         instruction,
         source: immediate,
         destination: reg_or_mem,
+        sizing, //TODO JUST A TEST
     }));
 }
 
@@ -210,30 +194,13 @@ pub fn extract_immediate_to_register(
 
     let reg = get_standard_register_encoding(reg_bits, is_word_encoding);
 
-    // Getting the immediate
-    let immediate;
-    if is_word_encoding {
-        immediate = get_u16_displacement_from_iterator(
-            machine_code,
-            byte1,
-            "Missing bytes for u16 immediate!",
-        )?;
-    } else {
-        immediate = get_u8_displacement_from_iterator(
-            machine_code,
-            byte1,
-            "Missing bytes for u16 immediate!",
-        )? as u16;
-    }
-    let immediate = Reference::Imm(Immediate {
-        value: immediate,
-        is_word_encoding,
-    });
+    let (immediate, sizing) = get_immediate_and_sizing(machine_code, byte1, is_word_encoding)?;
 
     return Ok(Some(Instruction {
         instruction,
         source: immediate,
         destination: reg,
+        sizing,
     }));
 }
 
@@ -272,5 +239,6 @@ pub fn extract_accumulator_to_memory_or_memory_to_accumulator(
         instruction,
         source,
         destination,
+        sizing: None,
     }));
 }

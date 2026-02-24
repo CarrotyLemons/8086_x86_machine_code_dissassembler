@@ -1,4 +1,39 @@
 use crate::errors::*;
+use crate::x86_definitions::*;
+
+pub fn get_immediate_and_sizing(
+    machine_code: &mut std::vec::IntoIter<u8>,
+    byte1: u8,
+    is_word_encoding: bool,
+) -> Result<(Reference, Option<InstructionSizing>), FailedDecode> {
+    let immediate;
+    let sizing = if is_word_encoding {
+        immediate = get_u16_displacement_from_iterator(
+            machine_code,
+            byte1,
+            "Missing bytes for u16 immediate!",
+        )?;
+        InstructionSizing {
+            is_source: true,
+            size: InstructionSizingOptions::Word,
+        }
+    } else {
+        immediate = get_u8_displacement_from_iterator(
+            machine_code,
+            byte1,
+            "Missing bytes for u8 immediate!",
+        )? as u16;
+        InstructionSizing {
+            is_source: true,
+            size: InstructionSizingOptions::Byte,
+        }
+    };
+    let sizing = Some(sizing);
+
+    let immediate = Reference::Imm(Immediate { value: immediate });
+
+    return Ok((immediate, sizing));
+}
 
 pub fn get_u8_displacement_from_iterator<'a>(
     iterator: &mut std::vec::IntoIter<u8>,
